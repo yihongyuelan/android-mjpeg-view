@@ -8,15 +8,16 @@
     android:orientation="vertical" tools:context=".MainActivity">
 
     <com.longdo.mjpegviewer.MjpegView
-        android:background="#F00"
         android:id="@+id/mjpegview"
+        android:background="#F00"
         android:layout_width="match_parent"
+        android:layout_weight="0"
         android:layout_height="0dp" />
 
-    <TextView
+    <ListView
+        android:id="@+id/cameraList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#000"
-        android:text="Fit width with auto adjust view height."
-        android:gravity="center"/>
+        android:layout_height="0dp"
+        android:background="#ccc"
+        android:layout_weight="1" />
 </LinearLayout>
