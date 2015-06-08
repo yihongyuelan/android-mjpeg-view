@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -129,6 +130,8 @@ public class MainActivity extends ActionBarActivity {
 
                     list.add(type + " : " + name);
                 }
+
+                Collections.sort(list);
 
                 br.close();
                 pw.close();
