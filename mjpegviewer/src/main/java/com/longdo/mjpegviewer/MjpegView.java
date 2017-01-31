@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +29,7 @@ public class MjpegView extends View{
     public static final int MODE_BEST_FIT = 3;
     public static final int MODE_STRETCH = 4;
 
+    private static final int WAIT_AFTER_READ_IMAGE_ERROR_MSEC = 5000;
     private static final int CHUNK_SIZE = 4096;
     private final String tag = getClass().getSimpleName();
 
@@ -44,6 +46,11 @@ public class MjpegView extends View{
     private int lastImgWidth, lastImgHeight;
 
     private boolean adjustWidth, adjustHeight;
+
+    private int msecWaitAfterReadImageError = WAIT_AFTER_READ_IMAGE_ERROR_MSEC;
+
+    private boolean isRecycleBitmap;
+    private boolean isUserForceConfigRecycle;
 
     public MjpegView(Context context){
         super(context);
@@ -89,8 +96,9 @@ public class MjpegView extends View{
     }
 
     public void setBitmap(Bitmap bm){
-        Log.d(tag,"New frame");
-        if(lastBitmap != null){
+        Log.v(tag,"New frame");
+        if(lastBitmap != null && ((isUserForceConfigRecycle && isRecycleBitmap) || (!isUserForceConfigRecycle && Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB))){
+            Log.v(tag,"Manually recycle bitmap");
             lastBitmap.recycle();
         }
 
@@ -228,7 +236,7 @@ public class MjpegView extends View{
 
     @Override
     protected void onDraw(Canvas c) {
-        if (c != null && lastBitmap != null) {
+        if (c != null && lastBitmap != null && !lastBitmap.isRecycled()) {
             if(isInEditMode()){
 
             }
@@ -259,6 +267,23 @@ public class MjpegView extends View{
         this.adjustHeight = adjustHeight;
     }
 
+    public int getMsecWaitAfterReadImageError() {
+        return msecWaitAfterReadImageError;
+    }
+
+    public void setMsecWaitAfterReadImageError(int msecWaitAfterReadImageError) {
+        this.msecWaitAfterReadImageError = msecWaitAfterReadImageError;
+    }
+
+    public boolean isRecycleBitmap() {
+        return isRecycleBitmap;
+    }
+
+    public void setRecycleBitmap(boolean recycleBitmap) {
+        isUserForceConfigRecycle = true;
+        isRecycleBitmap = recycleBitmap;
+    }
+
     class MjpegDownloader extends Thread{
 
         private boolean run = true;
@@ -277,7 +302,7 @@ public class MjpegView extends View{
 
                 HttpURLConnection connection = null;
                 BufferedInputStream bis = null;
-                URL serverUrl;
+                URL serverUrl = null;
 
                 try {
                     serverUrl = new URL(url);
@@ -355,10 +380,12 @@ public class MjpegView extends View{
                     Log.e(tag, e.getMessage());
                 }
 
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    Log.e(tag, e.getMessage());
+                if(msecWaitAfterReadImageError > 0) {
+                    try {
+                        Thread.sleep(msecWaitAfterReadImageError);
+                    } catch (InterruptedException e) {
+                        Log.e(tag, e.getMessage());
+                    }
                 }
             }
         }
