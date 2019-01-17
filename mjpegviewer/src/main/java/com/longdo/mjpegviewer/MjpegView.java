@@ -182,8 +182,8 @@ public class MjpegView extends View{
                     //duplicated code
                     //fit width
                     int newHeight = (int)(((float)lastImgHeight/(float)lastImgWidth)*vWidth);
-
-                    drawX = 0;
+		    int newWidth = (int) (((float) lastImgWidth / (float) lastImgHeight) * vHeight);
+                    drawX = (vWidth - newWidth) / 2;
 
                     if(adjustHeight){
                         vHeight = newHeight;
@@ -201,8 +201,8 @@ public class MjpegView extends View{
                     //duplicated code
                     //fit height
                     int newWidth = (int)(((float)lastImgWidth/(float)lastImgHeight)*vHeight);
-
-                    drawY = 0;
+		    int newHeight = (int) (((float) lastImgHeight / (float) lastImgWidth) * vWidth);
+		    drawY = (vHeight - newHeight) / 2;
 
                     if(adjustWidth){
                         vWidth = newWidth;
